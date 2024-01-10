@@ -1,0 +1,157 @@
+﻿@model ML.Producto
+@{
+    ViewData["Title"] = "Form";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <h2><strong>@ViewBag.Titulo</strong></h2>
+        </div>
+    </div>
+
+    <hr />
+
+    @using (Html.BeginForm("Form", "Producto", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        <div class="row">
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.IdProducto, new { @class = "control-label col-md-2 visually-hidden" })
+                @Html.TextBoxFor(model => model.IdProducto, new { @class = "form-control visually-hidden", @readonly = true })
+                @Html.ValidationMessageFor(model => model.IdProducto)
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.TipoProducto.SubCategoria.Categoria, new { @class = "control-label col-md-2" })
+                @Html.DropDownListFor(model => model.TipoProducto.SubCategoria.Categoria.IdCategoria, new SelectList(Model.TipoProducto.SubCategoria.Categoria.Categorias, "IdCategoria", "NombreCategoria"), "Selecciona una categoria: ", new { @class = "form-control", @id = "ddlCategoria" })
+                @Html.ValidationMessageFor(model => model.TipoProducto.SubCategoria.Categoria.IdCategoria)
+            </div>
+
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.TipoProducto.SubCategoria, new { @class = "control-label col-md-2" })
+                @if (Model.TipoProducto.SubCategoria.Subcategorias == null || Model.TipoProducto.SubCategoria.Subcategorias.Count == 0)
+                {
+                    @Html.DropDownListFor(model => model.TipoProducto.SubCategoria.IdSubcategoria, new SelectList(string.Empty, "Value", "Text"), "Selecciona una subcategoria: ", new { @class = "form-control", @id = "ddlSubcategoria" })
+                    @Html.ValidationMessageFor(model => model.TipoProducto.SubCategoria.IdSubcategoria)
+                }
+                else
+                {
+                    @Html.DropDownListFor(model => model.TipoProducto.SubCategoria.IdSubcategoria, new SelectList(Model.TipoProducto.SubCategoria.Subcategorias, "IdSubcategoria", "NombreSubcategoria"), "Selecciona una subcategoria: ", new { @class = "form-control", @id = "ddlSubcategoria" })
+                    @Html.ValidationMessageFor(model => model.TipoProducto.SubCategoria.IdSubcategoria)
+                }
+            </div>
+
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.TipoProducto, new { @class = "control-label col-md-2" })
+                @if (Model.TipoProducto.TiposProductos == null || Model.TipoProducto.TiposProductos.Count == 0)
+                {
+                    @Html.DropDownListFor(model => model.TipoProducto.IdTipoProducto, new SelectList(string.Empty, "Value", "Text"), "Selecciona el tipo de producto: ", new { @class = "form-control", @id = "ddlTipoProducto" })
+                    @Html.ValidationMessageFor(model => model.TipoProducto.IdTipoProducto)
+                }
+                else
+                {
+                    @Html.DropDownListFor(model => model.TipoProducto.IdTipoProducto, new SelectList(Model.TipoProducto.TiposProductos, "IdTipoProducto", "Tipo"), "Selecciona el tipo de producto: ", new { @class = "form-control", @id = "ddlTipoProducto" })
+                    @Html.ValidationMessageFor(model => model.TipoProducto.IdTipoProducto)
+                }
+            </div>
+
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.NombreProducto, new { @class = "control-label col-md-2" })
+                @Html.TextBoxFor(model => model.NombreProducto, new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.NombreProducto)
+            </div>
+        </div>
+
+        <br />
+
+        <div class="row">
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.NumMaterial, new { @class = "control-label col-md-2" })
+                @Html.TextBoxFor(model => model.NumMaterial, new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.NumMaterial)
+            </div>
+
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.Inventario, new { @class = "control-label col-md-2" })
+                @Html.TextBoxFor(model => model.Inventario, new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Inventario)
+            </div>
+        </div>
+
+        <br />
+
+        <div class="row">
+            <div class="col-md-4">
+            </div>
+
+            <div class="col-md-2">
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <input type="submit" value="@ViewBag.Action" class="btn btn-success" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        @Html.ActionLink("Regresar", "GetAll", "Libro", htmlAttributes: new { @class = "btn btn-primary" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-2">
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts{
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js" integrity="sha256-lSjKY0/srUM9BE3dPm+c4fBo1dky2v27Gdjm2uoZaL0=" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+
+            $("#ddlCategoria").change(function(){
+                $("#ddlSubcategoria").empty();
+                $.ajax({
+                    type: 'GET',
+                    url: '@Url.Action("GetSubcategorias")',
+                    dataType: 'json',
+                    data: { idcategoria: $("#ddlCategoria").val() },
+                    success: function(subcategorias){
+                        $("#ddlSubcategoria").append('<option value ="0">' + 'Selecciona una subcategoria: ' + '</option>');
+                        $.each(subcategorias.objects, function(i, subcategorias){
+                            $("#ddlSubcategoria").append('<option value="' + subcategorias.idSubcategoria + '">' + subcategorias.nombreSubcategoria + '</option>');
+                        });
+                    },
+                    error: function(ex){
+                        alert('Failed' + ex);
+                    }
+                });
+            });
+
+            $("#ddlSubcategoria").change(function(){
+                $("#ddlTipoProducto").empty();
+                $.ajax({
+                    type: 'GET',
+                    url: '@Url.Action("GetTipoProducto")',
+                    dataType: 'json',
+                    data: { idSubcategoria: $("#ddlSubcategoria").val() },
+                    success: function(tiposproductos){
+                        $("#ddlTipoProducto").append('<option value="0">' + 'Selecciona el tipo de producto: ' + '</option>');
+                        $.each(tiposproductos.objects, function(i, tiposproductos){
+                            $("#ddlTipoProducto").append('<option value="' + tiposproductos.idTipoProducto + '">' + tiposproductos.tipo + '</option>');
+                        });
+                    },
+                    eror: function(ex){
+                        alert('Failed' + ex);
+                    }
+                });
+            });
+
+        });
+    </script>
+}
